@@ -87,23 +87,7 @@ docker rm cloudforge-demo
 ```
 
 ---
-
-## ⚙️ 4. Environment Variables Example
-
-CloudForge reads the `CLOUDFORGE_ENV` environment variable to display your deployment target.
-
-### Running with a custom environment locally:
-```bash
-# macOS / Linux
-CLOUDFORGE_ENV=aws python app.py
-
-# Or with Docker
-docker run -p 5000:5000 -e CLOUDFORGE_ENV=aws cloudforge-app
-```
-
----
-
-## 🎯 5. Mini Challenge Ideas for Students
+## 🎯 4. Mini Challenge Ideas for Students
 
 Test your skills by customizing the application:
 
