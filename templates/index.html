@@ -668,18 +668,22 @@
             </div>
 
             <!-- Stage 3: AWS -->
-            <div class="pipeline-step pending" id="step-aws">
+            <div class="pipeline-step {% if environment.lower() == 'aws' %}active{% else %}pending{% endif %}" id="step-aws">
               <div class="icon">☁️</div>
               <div class="step-name">AWS</div>
-              <div class="step-status status-pending" id="status-aws-text">○ NOT DEPLOYED</div>
+              <div class="step-status {% if environment.lower() == 'aws' %}status-ready{% else %}status-pending{% endif %}" id="status-aws-text">
+                {% if environment.lower() == 'aws' %}✓ DEPLOYED{% else %}○ NOT DEPLOYED{% endif %}
+              </div>
               <div class="step-desc">Target: EC2 Instance</div>
             </div>
 
             <!-- Stage 4: Internet -->
-            <div class="pipeline-step pending" id="step-internet">
+            <div class="pipeline-step {% if environment.lower() == 'aws' %}active{% else %}pending{% endif %}" id="step-internet">
               <div class="icon">🌐</div>
               <div class="step-name">INTERNET</div>
-              <div class="step-status status-pending" id="status-internet-text">○ NOT DEPLOYED</div>
+              <div class="step-status {% if environment.lower() == 'aws' %}status-ready{% else %}status-pending{% endif %}" id="status-internet-text">
+                {% if environment.lower() == 'aws' %}✓ LIVE{% else %}○ NOT DEPLOYED{% endif %}
+              </div>
               <div class="step-desc">Listening on 0.0.0.0:5000</div>
             </div>
           </div>
@@ -701,7 +705,7 @@
               <div class="status-dot pulsing" id="healthDot"></div>
               <div>
                 <div class="health-text" id="healthStatusText">APPLICATION HEALTHY</div>
-                <div style="font-size: 0.78rem; color: var(--text-muted);" id="healthSubText">Flask server active on 0.0.0.0:5000</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);" id="healthSubText">Flask server active on 0.0.0.0:5000 &bull; Environment: {{ environment }}</div>
               </div>
             </div>
             <div class="health-details">
@@ -770,7 +774,7 @@
                 <td class="label">Environment</td>
                 <td class="value">
                   <span class="env-tag {% if environment.lower() == 'aws' %}aws{% endif %}" id="envTag">
-                    CLOUDFORGE_ENV={{ environment }}
+                    APP_ENV={{ environment }}
                   </span>
                 </td>
               </tr>

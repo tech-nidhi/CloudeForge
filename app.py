@@ -8,9 +8,9 @@ from localhost, containerize it with Docker, and deploy it to AWS.
 
 STUDENT CHALLENGE ZONES:
 - Level 1: Modify APP_NAME or GREETING below.
-- Level 2: Customize the mission objectives in templates/index.html.
-- Level 3: Set the CLOUDFORGE_ENV environment variable (e.g. export CLOUDFORGE_ENV=aws).
-- Level 4: Expand the /about or /health endpoints with custom metadata.
+- Level 2: Add or extend the /about endpoint.
+- Level 3: Set the APP_ENV environment variable (e.g. export APP_ENV=aws).
+- Level 4: Deploy the containerized app to AWS EC2.
 =============================================================================
 """
 
@@ -21,12 +21,13 @@ from flask import Flask, render_template, jsonify, request
 app = Flask(__name__)
 
 # ---------------------------------------------------------------------------
-# EASY STUDENT CONFIGURATION (Level 1 Challenge)
+# 1. ENVIRONMENT VARIABLES (Level 1 & Level 3 Challenge)
 # ---------------------------------------------------------------------------
-APP_NAME = "CloudForge"
-GREETING = "Hello from CloudForge!"
+APP_NAME = os.getenv("APP_NAME", "CloudForge")
+APP_ENV = os.getenv("APP_ENV", os.getenv("CLOUDFORGE_ENV", "local"))
+GREETING = os.getenv("GREETING", f"Hello from {APP_NAME}!")
 TAGLINE = "Build. Containerize. Deploy."
-WORKSHOP_TITLE = "CLOUDFORGE: FROM CODE TO CLOUD"
+WORKSHOP_TITLE = f"{APP_NAME.upper()}: FROM CODE TO CLOUD"
 
 
 # ---------------------------------------------------------------------------
@@ -37,11 +38,9 @@ WORKSHOP_TITLE = "CLOUDFORGE: FROM CODE TO CLOUD"
 def index():
     """
     Renders the CloudForge Launchpad dashboard.
-    Demonstrates reading environment variables and system context.
+    Dynamically reflects APP_NAME and APP_ENV.
     """
-    # Read environment variable with a safe fallback to 'local'
-    current_env = os.environ.get("CLOUDFORGE_ENV", "local")
-    app_mode = os.environ.get("CLOUDFORGE_MODE", "Workshop")
+    app_mode = os.getenv("APP_MODE", "Workshop")
     
     # Safe host/container detection for educational display
     try:
@@ -52,10 +51,11 @@ def index():
     return render_template(
         "index.html",
         app_name=APP_NAME,
+        app_env=APP_ENV,
         greeting=GREETING,
         tagline=TAGLINE,
         workshop_title=WORKSHOP_TITLE,
-        environment=current_env,
+        environment=APP_ENV,
         mode=app_mode,
         hostname=hostname,
     )
@@ -68,35 +68,19 @@ def health():
     and our frontend dashboard health monitor.
     Returns HTTP 200 OK with plain text confirmation.
     """
-    # Returns the exact string requested for the AWS deployment demonstration
     return "Application is healthy", 200, {"Content-Type": "text/plain; charset=utf-8"}
 
 
 @app.route("/about")
 def about():
     """
-    Returns information about the CloudForge educational workshop.
-    Supports both HTML browser viewing and JSON API clients.
+    Returns application metadata and environment info in JSON.
     """
-    current_env = os.environ.get("CLOUDFORGE_ENV", "local")
-    
-    # If a JSON client or curl asks with Accept: application/json or query param ?format=json
-    if request.headers.get("Accept") == "application/json" or request.args.get("format") == "json":
-        return jsonify({
-            "application": APP_NAME,
-            "workshop": WORKSHOP_TITLE,
-            "purpose": "Demonstrate the journey from local development to containerized deployment on AWS.",
-            "pipeline": ["Code", "Container", "AWS", "Internet"],
-            "environment": current_env,
-            "version": "1.0.0"
-        })
-    
-    return render_template(
-        "about.html",
-        app_name=APP_NAME,
-        workshop_title=WORKSHOP_TITLE,
-        environment=current_env
-    )
+    return jsonify({
+        "app": APP_NAME,
+        "description": "Built with Python + Docker",
+        "environment": APP_ENV
+    })
 
 
 # ---------------------------------------------------------------------------
@@ -106,5 +90,5 @@ if __name__ == "__main__":
     # CRITICAL FOR DOCKER & AWS EC2:
     # Must bind to 0.0.0.0 so the container and cloud host accept external traffic.
     # Port 5000 is our standard workshop port.
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.getenv("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
