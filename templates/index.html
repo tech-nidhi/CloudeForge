@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ app_name }} Launchpad | From Code to Cloud</title>
+  <meta name="description" content="CloudForge Launchpad - Educational dashboard demonstrating the journey from localhost to containerized AWS deployment.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(18, 25, 41, 0.75);
+      --bg-card-hover: rgba(28, 38, 62, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(255, 153, 0, 0.4);
+      --aws-orange: #FF9900;
+      --aws-orange-glow: rgba(255, 153, 0, 0.25);
+      --aws-orange-dark: #cc7a00;
+      --cloud-blue: #38bdf8;
+      --cloud-blue-glow: rgba(56, 189, 248, 0.2);
+      --accent-purple: #818cf8;
+      --success-green: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.25);
+      --danger-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(255, 153, 0, 0.07) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(129, 140, 248, 0.05) 0%, transparent 50%);
+      background-attachment: fixed;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Glass Card Base */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 1.75rem;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      border: 1px solid rgba(255, 153, 0, 0.3);
+      background: rgba(255, 153, 0, 0.08);
+      color: var(--aws-orange);
+    }
+
+    .badge-pill .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--aws-orange);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--aws-orange);
+      animation: pulse 2s infinite;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #ffffff 30%, #cbd5e1 70%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-tagline {
+      font-size: clamp(1.1rem, 2vw, 1.4rem);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--aws-orange);
+      margin-bottom: 1rem;
+    }
+
+    .hero-subtext {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 1.5rem auto;
+    }
+
+    .greeting-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px dashed rgba(56, 189, 248, 0.4);
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      color: var(--cloud-blue);
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      box-shadow: 0 4px 20px var(--cloud-blue-glow);
+    }
+
+    .greeting-box .sparkle {
+      font-size: 1.1rem;
+    }
+
+    /* Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .col-12 { grid-column: span 12; }
+    .col-8  { grid-column: span 8; }
+    .col-6  { grid-column: span 6; }
+    .col-4  { grid-column: span 4; }
+
+    @media (max-width: 900px) {
+      .col-8, .col-6, .col-4 {
+        grid-column: span 12;
+      }
+    }
+
+    /* Section Headers */
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .section-title h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .section-title .badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Deployment Pipeline */
+    .pipeline-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .pipeline-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pipeline-step {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .pipeline-step.active {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.05);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+    }
+
+    .pipeline-step.pending {
+      border-color: rgba(255, 255, 255, 0.08);
+      opacity: 0.75;
+    }
+
+    .pipeline-step .icon {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .pipeline-step .step-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.05em;
+      color: var(--text-main);
+      margin-bottom: 0.35rem;
+    }
+
+    .pipeline-step .step-status {
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .status-ready {
+      color: var(--success-green);
+    }
+
+    .status-pending {
+      color: var(--text-dim);
+    }
+
+    .pipeline-step .step-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+
+    /* Health Card */
+    .health-display {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(11, 17, 32, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .health-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .status-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--success-green);
+      box-shadow: 0 0 14px var(--success-green);
+      transition: all 0.3s ease;
+    }
+
+    .status-dot.pulsing {
+      animation: pulse 1.5s infinite;
+    }
+
+    .status-dot.error {
+      background: var(--danger-red);
+      box-shadow: 0 0 14px var(--danger-red);
+    }
+
+    .health-text {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .health-details {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid transparent;
+      text-decoration: none;
+      width: 100%;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-orange {
+      background: linear-gradient(135deg, var(--aws-orange), var(--aws-orange-dark));
+      color: #000;
+      box-shadow: 0 4px 15px var(--aws-orange-glow);
+    }
+
+    .btn-orange:hover {
+      background: linear-gradient(135deg, #ffaa22, var(--aws-orange));
+      box-shadow: 0 6px 20px rgba(255, 153, 0, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-blue {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: rgba(56, 189, 248, 0.3);
+      color: var(--cloud-blue);
+    }
+
+    .btn-blue:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: rgba(56, 189, 248, 0.5);
+    }
+
+    /* Mission Box */
+    .mission-card {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.06), rgba(129, 140, 248, 0.06));
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .mission-display {
+      background: rgba(11, 17, 32, 0.9);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 1rem 0 1.25rem 0;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .mission-number {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--cloud-blue);
+      margin-bottom: 0.25rem;
+    }
+
+    .mission-text {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: #f1f5f9;
+    }
+
+    /* Environment Info Table */
+    .env-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .env-table tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .env-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .env-table td {
+      padding: 0.75rem 0.25rem;
+    }
+
+    .env-table .label {
+      color: var(--text-muted);
+      width: 45%;
+    }
+
+    .env-table .value {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      color: var(--text-main);
+      text-align: right;
+    }
+
+    .env-tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--cloud-blue);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .env-tag.aws {
+      background: rgba(255, 153, 0, 0.15);
+      color: var(--aws-orange);
+      border-color: rgba(255, 153, 0, 0.4);
+    }
+
+    /* Celebration Modal / Banner */
+    .celebration-box {
+      display: none;
+      margin-top: 1rem;
+      padding: 1.25rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255, 153, 0, 0.12), rgba(16, 185, 129, 0.12));
+      border: 1px solid rgba(255, 153, 0, 0.3);
+      text-align: center;
+      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .celebration-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.35rem;
+    }
+
+    .celebration-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .disclaimer-note {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 0.6rem;
+      font-style: italic;
+    }
+
+    /* About Section Content */
+    .about-content {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .feature-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feature-item {
+      background: rgba(11, 17, 32, 0.5);
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .feature-item strong {
+      display: block;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .feature-item span {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      background: rgba(9, 13, 22, 0.95);
+      margin-top: auto;
+    }
+
+    .footer-brand {
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+      color: var(--text-main);
+    }
+
+    .footer-tagline {
+      font-size: 0.85rem;
+      color: var(--aws-orange);
+      margin-bottom: 1rem;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      font-size: 0.85rem;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      transition: color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .footer-links a:hover {
+      color: var(--cloud-blue);
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.92); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95) translateY(5px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Interactive Confetti / Sparks Canvas */
+    #celebrationCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="celebrationCanvas"></canvas>
+
+  <div class="container">
+    
+    <!-- Hero Section -->
+    <header class="hero">
+      <div class="badge-pill">
+        <span class="pulse-dot"></span>
+        {{ workshop_title }}
+      </div>
+      <h1>{{ app_name }}</h1>
+      <div class="hero-tagline">From Code to Cloud</div>
+      <p class="hero-subtext">Your application is ready for deployment.</p>
+      
+      <div class="greeting-box">
+        <span class="sparkle">⚡</span>
+        <span id="greetingText">{{ greeting }}</span>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="grid">
+      
+      <!-- Deployment Journey Pipeline -->
+      <div class="col-12">
+        <section class="card">
+          <div class="section-title">
+            <h2>
+              <span>🚀</span> Deployment Journey
+            </h2>
+            <span class="badge">Workshop Mode</span>
+          </div>
+
+          <div class="pipeline-container">
+            <!-- Stage 1: Code -->
+            <div class="pipeline-step active" id="step-code">
+              <div class="icon">💻</div>
+              <div class="step-name">CODE</div>
+              <div class="step-status status-ready">✓ READY</div>
+              <div class="step-desc">Flask application ready</div>
+            </div>
+
+            <!-- Stage 2: Container -->
+            <div class="pipeline-step active" id="step-container">
+              <div class="icon">🐳</div>
+              <div class="step-name">CONTAINER</div>
+              <div class="step-status status-ready">✓ READY</div>
+              <div class="step-desc">Docker package configured</div>
+            </div>
+
+            <!-- Stage 3: AWS -->
+            <div class="pipeline-step pending" id="step-aws">
+              <div class="icon">☁️</div>
+              <div class="step-name">AWS</div>
+              <div class="step-status status-pending" id="status-aws-text">○ NOT DEPLOYED</div>
+              <div class="step-desc">Target: EC2 Instance</div>
+            </div>
+
+            <!-- Stage 4: Internet -->
+            <div class="pipeline-step pending" id="step-internet">
+              <div class="icon">🌐</div>
+              <div class="step-name">INTERNET</div>
+              <div class="step-status status-pending" id="status-internet-text">○ NOT DEPLOYED</div>
+              <div class="step-desc">Listening on 0.0.0.0:5000</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Health Status Card -->
+      <div class="col-6">
+        <section class="card" style="height: 100%; display: flex; flex-direction: column;">
+          <div class="section-title">
+            <h2>
+              <span>💓</span> Application Status
+            </h2>
+            <span class="badge" id="endpointBadge">GET /health</span>
+          </div>
+
+          <div class="health-display">
+            <div class="health-indicator">
+              <div class="status-dot pulsing" id="healthDot"></div>
+              <div>
+                <div class="health-text" id="healthStatusText">APPLICATION HEALTHY</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);" id="healthSubText">Flask server active on 0.0.0.0:5000</div>
+              </div>
+            </div>
+            <div class="health-details">
+              <div id="healthLatency">Response: 200 OK</div>
+              <div style="font-size: 0.72rem; color: var(--text-dim);" id="healthTimestamp">Just checked</div>
+            </div>
+          </div>
+
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; flex: 1;">
+            Live health verification endpoint. Used by AWS Application Load Balancers and container orchestrators to monitor instance vitality.
+          </p>
+
+          <button class="btn btn-orange" id="btnCheckHealth" onclick="checkApplicationHealth()">
+            <span id="btnHealthSpinner" style="display: none;">⏳</span>
+            <span id="btnHealthLabel">CHECK HEALTH</span>
+          </button>
+        </section>
+      </div>
+
+      <!-- Cloud Mission Card -->
+      <div class="col-6">
+        <section class="card mission-card" style="height: 100%; display: flex; flex-direction: column;">
+          <div class="section-title">
+            <h2>
+              <span>☁️</span> Cloud Mission
+            </h2>
+            <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: var(--cloud-blue); border-color: rgba(56, 189, 248, 0.3);">Mini Challenge</span>
+          </div>
+
+          <p style="font-size: 0.9rem; color: var(--text-muted);">
+            Get this application from localhost to the internet.
+          </p>
+
+          <div class="mission-display">
+            <div class="mission-number" id="missionNumber">Mission #1</div>
+            <div class="mission-text" id="missionText">Change the CloudForge greeting in app.py.</div>
+          </div>
+
+          <button class="btn btn-blue" id="btnNewMission" onclick="generateNewMission()" style="margin-top: auto;">
+            <span>🎲</span> NEW MISSION
+          </button>
+        </section>
+      </div>
+
+      <!-- Environment Card -->
+      <div class="col-6">
+        <section class="card">
+          <div class="section-title">
+            <h2>
+              <span>⚙️</span> Running Environment
+            </h2>
+            <span class="badge">System Context</span>
+          </div>
+
+          <table class="env-table">
+            <tbody>
+              <tr>
+                <td class="label">Application</td>
+                <td class="value">{{ app_name }}</td>
+              </tr>
+              <tr>
+                <td class="label">Mode</td>
+                <td class="value">{{ mode }}</td>
+              </tr>
+              <tr>
+                <td class="label">Environment</td>
+                <td class="value">
+                  <span class="env-tag {% if environment.lower() == 'aws' %}aws{% endif %}" id="envTag">
+                    CLOUDFORGE_ENV={{ environment }}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="label">Server Host / Port</td>
+                <td class="value">0.0.0.0:5000</td>
+              </tr>
+              <tr>
+                <td class="label">Container Hostname</td>
+                <td class="value" style="font-size: 0.8rem;">{{ hostname }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+
+      <!-- Deployment Celebration Card -->
+      <div class="col-6">
+        <section class="card" style="height: 100%; display: flex; flex-direction: column;">
+          <div class="section-title">
+            <h2>
+              <span>🎯</span> Deployment Check
+            </h2>
+            <span class="badge">Interactive Demo</span>
+          </div>
+
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem; flex: 1;">
+            Ready to test your workshop milestone? Click below to run the workshop deployment simulation checklist.
+          </p>
+
+          <div class="celebration-box" id="celebrationBox">
+            <div class="celebration-title">🚀 READY FOR TAKEOFF!</div>
+            <div class="celebration-sub">Your application structure is primed for AWS cloud hosting.</div>
+            <div class="disclaimer-note">Workshop check • Educational simulation</div>
+          </div>
+
+          <button class="btn btn-outline" id="btnCheckDeployment" onclick="triggerDeploymentCheck()" style="margin-top: 1rem;">
+            <span>✨</span> CHECK MY DEPLOYMENT
+          </button>
+        </section>
+      </div>
+
+      <!-- About Section -->
+      <div class="col-12">
+        <section class="card">
+          <div class="section-title">
+            <h2>
+              <span>📖</span> About CloudForge
+            </h2>
+            <span class="badge">Workshop Overview</span>
+          </div>
+
+          <p class="about-content">
+            CloudForge is a hands-on learning application built to demonstrate the journey from local development to containerized deployment on AWS.
+          </p>
+
+          <div class="feature-list">
+            <div class="feature-item">
+              <strong>1. Local Development</strong>
+              <span>Fast iteration with Python and Flask on localhost:5000.</span>
+            </div>
+            <div class="feature-item">
+              <strong>2. Container Packaging</strong>
+              <span>Reproducible environments with Dockerfile & lightweight images.</span>
+            </div>
+            <div class="feature-item">
+              <strong>3. Cloud Deployment</strong>
+              <span>Running containers reliably on AWS EC2 across the globe.</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-brand">{{ app_name }}</div>
+    <div class="footer-tagline">{{ tagline }}</div>
+    <div class="footer-links">
+      <a href="/health" target="_blank" rel="noopener">/health</a>
+      <a href="/about" target="_blank" rel="noopener">/about</a>
+      <a href="/about?format=json" target="_blank" rel="noopener">/about (JSON)</a>
+    </div>
+  </footer>
+
+  <!-- Vanilla JavaScript Logic -->
+  <script>
+    // ---------------------------------------------------------------------------
+    // 1. HEALTH CHECK IMPLEMENTATION (Calls real Flask /health endpoint)
+    // ---------------------------------------------------------------------------
+    async function checkApplicationHealth() {
+      const btn = document.getElementById('btnCheckHealth');
+      const label = document.getElementById('btnHealthLabel');
+      const spinner = document.getElementById('btnHealthSpinner');
+      const dot = document.getElementById('healthDot');
+      const statusText = document.getElementById('healthStatusText');
+      const subText = document.getElementById('healthSubText');
+      const latencyText = document.getElementById('healthLatency');
+      const timeText = document.getElementById('healthTimestamp');
+
+      // Loading state
+      btn.disabled = true;
+      spinner.style.display = 'inline-block';
+      label.textContent = 'CHECKING...';
+      const startTime = performance.now();
+
+      try {
+        const response = await fetch('/health', {
+          method: 'GET',
+          cache: 'no-cache'
+        });
+
+        const elapsed = Math.round(performance.now() - startTime);
+        const data = await response.text();
+
+        if (response.ok && data.includes('Application is healthy')) {
+          dot.className = 'status-dot pulsing';
+          statusText.textContent = '● APPLICATION HEALTHY';
+          statusText.style.color = 'var(--text-main)';
+          subText.textContent = `Endpoint response: "${data.trim()}"`;
+          latencyText.textContent = `200 OK (${elapsed}ms)`;
+          timeText.textContent = new Date().toLocaleTimeString();
+        } else {
+          throw new Error(`Unexpected status ${response.status}`);
+        }
+      } catch (err) {
+        dot.className = 'status-dot error';
+        statusText.textContent = '● APPLICATION UNAVAILABLE';
+        statusText.style.color = 'var(--danger-red)';
+        subText.textContent = 'Could not reach /health endpoint';
+        latencyText.textContent = 'Connection Error';
+        timeText.textContent = new Date().toLocaleTimeString();
+      } finally {
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        label.textContent = 'CHECK HEALTH';
+      }
+    }
+
+    // ---------------------------------------------------------------------------
+    // 2. RANDOMIZED CLOUD MISSION GENERATOR
+    // ---------------------------------------------------------------------------
+    const missions = [
+      { id: 1, text: "Change the CloudForge greeting in app.py." },
+      { id: 2, text: "Add a new /about or custom JSON endpoint in app.py." },
+      { id: 3, text: "Set CLOUDFORGE_ENV=aws and restart the application." },
+      { id: 4, text: "Change the deployment message or styling in templates/index.html." },
+      { id: 5, text: "Add your own cloud-themed message to the hero section." },
+      { id: 6, text: "Build the container image with: docker build -t cloudforge-app ." },
+      { id: 7, text: "Run the containerized app with: docker run -p 5000:5000 cloudforge-app" },
+      { id: 8, text: "Test the health check via terminal: curl http://localhost:5000/health" }
+    ];
+
+    let currentMissionIndex = 0;
+
+    function generateNewMission() {
+      let nextIndex;
+      do {
+        nextIndex = Math.floor(Math.random() * missions.length);
+      } while (nextIndex === currentMissionIndex && missions.length > 1);
+
+      currentMissionIndex = nextIndex;
+      const mission = missions[currentMissionIndex];
+
+      const missionElem = document.querySelector('.mission-display');
+      missionElem.style.opacity = '0';
+      missionElem.style.transform = 'translateY(4px)';
+
+      setTimeout(() => {
+        document.getElementById('missionNumber').textContent = `Mission #${mission.id}`;
+        document.getElementById('missionText').textContent = mission.text;
+        missionElem.style.opacity = '1';
+        missionElem.style.transform = 'translateY(0)';
+      }, 150);
+    }
+
+    // ---------------------------------------------------------------------------
+    // 3. DEPLOYMENT CELEBRATION & SIMULATION
+    // ---------------------------------------------------------------------------
+    function triggerDeploymentCheck() {
+      const box = document.getElementById('celebrationBox');
+      box.style.display = 'block';
+
+      // Temporarily light up the AWS & Internet steps for educational visual feedback
+      const awsStep = document.getElementById('step-aws');
+      const internetStep = document.getElementById('step-internet');
+      const awsStatus = document.getElementById('status-aws-text');
+      const internetStatus = document.getElementById('status-internet-text');
+
+      awsStep.classList.add('active');
+      awsStep.classList.remove('pending');
+      awsStatus.className = 'step-status status-ready';
+      awsStatus.textContent = '✓ SIMULATED';
+
+      internetStep.classList.add('active');
+      internetStep.classList.remove('pending');
+      internetStatus.className = 'step-status status-ready';
+      internetStatus.textContent = '✓ SIMULATED';
+
+      // Launch lightweight confetti particles
+      createConfetti();
+    }
+
+    // Lightweight confetti animation (Zero external libraries)
+    function createConfetti() {
+      const canvas = document.getElementById('celebrationCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#FF9900', '#38bdf8', '#10b981', '#ffffff', '#818cf8'];
+
+      for (let i = 0; i < 60; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 0.8) * 14,
+          size: Math.random() * 6 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1,
+          decay: Math.random() * 0.015 + 0.01
+        });
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+
+        particles.forEach(p => {
+          if (p.alpha > 0) {
+            active = true;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.25; // gravity
+            p.alpha -= p.decay;
+
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, p.alpha);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+            ctx.restore();
+          }
+        });
+
+        if (active) {
+          requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      render();
+    }
+
+    // Set initial check time
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('healthTimestamp').textContent = new Date().toLocaleTimeString();
+    });
+  </script>
+</body>
+</html>
